@@ -2,6 +2,8 @@
 
 This Binding is used to control LED stripes connected by WiFi. These devices are sold with different names, i.e. Magic Home LED, UFO LED, LED NET controller, etc.  
 
+The original add-on code can be found [here](https://github.com/monnimeter/openhab2/tree/wifiled/addons/binding/org.openhab.binding.wifiled).
+
 ## Supported Things
 
 This Binding supports RGB(W) LED devices.
