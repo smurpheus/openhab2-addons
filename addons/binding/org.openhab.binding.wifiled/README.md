@@ -18,12 +18,22 @@ No binding configuration required.
 
 ## Thing Configuration
 
-Usually no manual configuration is required.
+Although this binding should usually work without manual configuration, it might be of interest if you want to enable color fading.
+
+The color fading can be enabled by selecting the "FADING" driver.
+If selected you can also set the number of fading steps and the fading duration.
+Note that each fading step will at least take 10 ms for being process.
+This natural limit is given by the speed of the LED controller.
+Thus, a color fading with a configured fading duration of 0 might still take some time (count with more than 1 second for 100 steps).
+IF the "FADING" driver is chosen the program channel and the programSpeed channel will not have any effect.
+If you want to use the those functions you should use the "CLASSIC" driver.
+
 If the automatic discovery does not work for some reason then the IP address and the port have to be set manually. Optionally, a refresh interval (in seconds) can be defined.
 The binding supports newer controllers also known as v3 or LD382A (default) and the older generation also known as LD382. As the two generations differ in their protocol it might be necessary to set the configuration appropriately.
 
 ## Channels
 
+- **power** Power state of the LEDs (on/off)
 - **color** Color of the RGB LEDs expressed as values of hue, saturation and brightness
 - **white** The brightness of the (warm) white LEDs
 - **program** The program to be automatically run by the controller (i.e. color cross fade, strobe, etc.)

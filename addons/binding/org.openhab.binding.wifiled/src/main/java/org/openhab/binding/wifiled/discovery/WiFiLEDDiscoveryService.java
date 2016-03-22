@@ -24,7 +24,8 @@ import org.eclipse.smarthome.config.discovery.DiscoveryResult;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
-import org.openhab.binding.wifiled.handler.WiFiLEDDriver;
+import org.openhab.binding.wifiled.handler.AbstractWiFiLEDDriver;
+import org.openhab.binding.wifiled.handler.ClassicWiFiLEDDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +80,7 @@ public class WiFiLEDDiscoveryService extends AbstractDiscoveryService {
             byte[] discover = "HF-A11ASSISTHREAD".getBytes();
             DatagramPacket packet = new DatagramPacket(discover, discover.length, inetAddress, DEFAULT_BROADCAST_PORT);
             socket.send(packet);
-            logger.debug("Disover message sent: '{}'", WiFiLEDDriver.bytesToHex(discover));
+            logger.debug("Disover message sent: '{}'", ClassicWiFiLEDDriver.bytesToHex(discover));
 
             // wait for responses
             while (true) {
@@ -93,7 +94,7 @@ public class WiFiLEDDiscoveryService extends AbstractDiscoveryService {
 
                 byte[] data = packet.getData();
                 String s = bytesToString(data);
-                logger.debug("Disover response received: '{}' [{}] ", s, WiFiLEDDriver.bytesToHex(data));
+                logger.debug("Disover response received: '{}' [{}] ", s, ClassicWiFiLEDDriver.bytesToHex(data));
 
                 // 192.168.178.25,ACCF23489C9A,HF-LPB100-ZJ200
                 // ^-IP..........,^-MAC.......,^-HOSTNAME.....
@@ -105,7 +106,7 @@ public class WiFiLEDDiscoveryService extends AbstractDiscoveryService {
                 logger.debug("Adding a new WiFi LED with IP '{}' and MAC '{}' to inbox", ip, mac);
                 Map<String, Object> properties = new HashMap<>();
                 properties.put("ip", ip);
-                properties.put("protocol", WiFiLEDDriver.Protocol.LD382A);
+                properties.put("protocol", AbstractWiFiLEDDriver.Protocol.LD382A);
                 ThingUID uid = new ThingUID(THING_TYPE_WIFILED, mac);
                 if (uid != null) {
                     DiscoveryResult result = DiscoveryResultBuilder.create(uid).withProperties(properties)

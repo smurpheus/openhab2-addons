@@ -17,7 +17,8 @@ import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.openhab.binding.wifiled.WiFiLEDBindingConstants;
 import org.openhab.binding.wifiled.configuration.WiFiLEDConfig;
-import org.openhab.binding.wifiled.handler.WiFiLEDDriver.Protocol;
+import org.openhab.binding.wifiled.handler.AbstractWiFiLEDDriver.Protocol;
+import org.openhab.binding.wifiled.handler.AbstractWiFiLEDDriver.Driver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ public class WiFiLEDHandler extends BaseThingHandler {
     private static final int INC_DEC_STEP = 10;
 
     private Logger logger = LoggerFactory.getLogger(WiFiLEDHandler.class);
-    private WiFiLEDDriver driver;
+    private AbstractWiFiLEDDriver driver;
     private ScheduledFuture<?> pollingJob;
 
     public WiFiLEDHandler(Thing thing) {
@@ -49,10 +50,24 @@ public class WiFiLEDHandler extends BaseThingHandler {
 
         WiFiLEDConfig config = getConfigAs(WiFiLEDConfig.class);
 
-        int port = (config.getPort() == null) ? WiFiLEDDriver.DEFAULT_PORT : config.getPort();
-        driver = new WiFiLEDDriver(config.getIp(), port, Protocol.valueOf(config.getProtocol()));
+        int port = (config.getPort() == null) ? AbstractWiFiLEDDriver.DEFAULT_PORT : config.getPort();
+        Protocol protocol = config.getProtocol() == null ? Protocol.LD382A : Protocol.valueOf(config.getProtocol());
+        Driver driverName = config.getDriver() == null ? Driver.CLASSIC : Driver.valueOf(config.getDriver());
+
+        switch (driverName) {
+            case CLASSIC:
+                driver = new ClassicWiFiLEDDriver(config.getIp(), port, protocol);
+                break;
+
+            case FADING:
+                int fadeDurationInMs = config.getFadeDurationInMs() == null ? FadingWiFiLEDDriver.DEFAULT_FADE_DURATION_IN_MS : config.getFadeDurationInMs();
+                int fadeSteps = config.getFadeSteps() == null ? FadingWiFiLEDDriver.DEFAULT_FADE_STEPS : config.getFadeSteps();
+                driver = new FadingWiFiLEDDriver(config.getIp(), port, protocol, fadeDurationInMs, fadeSteps);
+                break;
+        }
+
         try {
-            driver.getLEDState();
+            driver.init();
 
             logger.debug("Found a WiFi LED device '{}'", getThing().getUID());
         } catch (IOException e) {
@@ -97,6 +112,8 @@ public class WiFiLEDHandler extends BaseThingHandler {
         try {
             if (command == RefreshType.REFRESH) {
                 update();
+            } else if (channelUID.getId().equals(WiFiLEDBindingConstants.CHANNEL_POWER)) {
+                handleColorCommand(command);
             } else if (channelUID.getId().equals(WiFiLEDBindingConstants.CHANNEL_COLOR)) {
                 handleColorCommand(command);
             } else if (channelUID.getId().equals(WiFiLEDBindingConstants.CHANNEL_WHITE)) {
@@ -118,12 +135,7 @@ public class WiFiLEDHandler extends BaseThingHandler {
         } else if (command instanceof PercentType) {
             driver.setBrightness((PercentType) command);
         } else if (command instanceof OnOffType) {
-            OnOffType onOffCommand = (OnOffType) command;
-            if (onOffCommand.equals(OnOffType.ON)) {
-                driver.setOn();
-            } else {
-                driver.setOff();
-            }
+            driver.setPower((OnOffType) command);
         } else if (command instanceof IncreaseDecreaseType) {
             IncreaseDecreaseType increaseDecreaseType = (IncreaseDecreaseType) command;
             if (increaseDecreaseType.equals(IncreaseDecreaseType.INCREASE)) {
@@ -178,8 +190,9 @@ public class WiFiLEDHandler extends BaseThingHandler {
         logger.debug("Updating WiFiLED data '{}'", getThing().getUID());
 
         try {
-            LEDStateDTO ledState = driver.getLEDState();
+            LEDStateDTO ledState = driver.getLEDStateDTO();
             HSBType color = new HSBType(ledState.getHue(), ledState.getSaturation(), ledState.getBrightness());
+            updateState(WiFiLEDBindingConstants.CHANNEL_POWER, ledState.power);
             updateState(WiFiLEDBindingConstants.CHANNEL_COLOR, color);
             updateState(WiFiLEDBindingConstants.CHANNEL_WHITE, ledState.getWhite());
             updateState(WiFiLEDBindingConstants.CHANNEL_PROGRAM, ledState.getProgram());
