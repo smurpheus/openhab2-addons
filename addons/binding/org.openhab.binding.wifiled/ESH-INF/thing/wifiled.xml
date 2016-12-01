@@ -42,6 +42,7 @@
 				<options>
 					<option value="LD382A">LD382A</option>
 					<option value="LD382">LD382</option>
+					<option value="LD686">LD686</option>
 				</options>
 				<advanced>true</advanced>
 			</parameter>
