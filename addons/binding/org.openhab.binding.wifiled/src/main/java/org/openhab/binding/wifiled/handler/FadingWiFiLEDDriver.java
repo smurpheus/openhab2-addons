@@ -138,41 +138,38 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
             keepFading = false;
             realTargetState = newState;
 
-            executorService.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    if (currentState.equals(newState)) return;
+            executorService.schedule(() -> {
+                if (currentState.equals(newState)) return;
 
-                    keepFading = true;
+                keepFading = true;
 
-                    try (Socket socket = new Socket(host, port)) {
-                        logger.debug("Connected to '{}'", socket);
+                try (Socket socket = new Socket(host, port)) {
+                    logger.debug("Connected to '{}'", socket);
 
-                        socket.setSoTimeout(DEFAULT_SOCKET_TIMEOUT);
+                    socket.setSoTimeout(DEFAULT_SOCKET_TIMEOUT);
 
-                        try (DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream())) {
-                            InternalLedState fadeState = currentState;
+                    try (DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream())) {
+                        InternalLedState fadeState = currentState;
 
-                            for (int i = 1; i <= fadeSteps && keepFading; i++) {
-                                long lastTime = System.nanoTime();
-                                fadeState = currentState.fade(newState, (double) i / fadeSteps);
-                                logger.debug("fadeState: " + fadeState);
+                        for (int i = 1; i <= fadeSteps && keepFading; i++) {
+                            long lastTime = System.nanoTime();
+                            fadeState = currentState.fade(newState, (double) i / fadeSteps);
+                            logger.debug("fadeState: " + fadeState);
 
-                                sendLEDData(fadeState, outputStream);
+                            sendLEDData(fadeState, outputStream);
 
-                                busySleep(fadeDurationInMs / fadeSteps, lastTime);
-                            }
-
-                            currentState = fadeState;
+                            busySleep(fadeDurationInMs / fadeSteps, lastTime);
                         }
-                    } catch (NoRouteToHostException e) {
-                        e.printStackTrace();
-                    } catch (SocketException e) {
-                        e.printStackTrace();
-                        logger.warn("SocketException", e);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+
+                        currentState = fadeState;
                     }
+                } catch (NoRouteToHostException e) {
+                    e.printStackTrace();
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                    logger.warn("SocketException", e);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }, 0, TimeUnit.SECONDS);
         }
