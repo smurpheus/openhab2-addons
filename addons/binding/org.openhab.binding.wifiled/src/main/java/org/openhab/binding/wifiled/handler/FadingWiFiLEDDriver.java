@@ -188,7 +188,8 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
         byte w = (byte) (ledState.getW() & 0xFF);
 
         logger.info("RGBW: {}, {}, {}, {}", r, g, b, w);
-        byte[] bytes = new byte[]{0x31, r, g, b, w, 0x00};
+
+        byte[] bytes = getBytesForColor(r, g, b, w);
         sendRaw(bytes, out);
     }
 

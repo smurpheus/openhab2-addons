@@ -124,7 +124,9 @@ public class ClassicWiFiLEDDriver extends AbstractWiFiLEDDriver {
             byte g = (byte) (ledState.getColor().getGreen() & 0xFF);
             byte b = (byte) (ledState.getColor().getBlue() & 0xFF);
             byte w = (byte) (((int) (ledState.getWhite().doubleValue() * 255 / 100)) & 0xFF);
-            byte[] bytes = new byte[] { 0x31, r, g, b, w, 0x00 };
+
+            byte[] bytes = getBytesForColor(r, g, b, w);
+
             sendRaw(bytes);
         } else {
             // program selected

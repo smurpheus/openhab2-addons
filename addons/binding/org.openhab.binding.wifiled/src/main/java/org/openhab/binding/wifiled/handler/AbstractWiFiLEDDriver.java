@@ -31,7 +31,8 @@ public abstract class AbstractWiFiLEDDriver {
 
     public enum Protocol {
         LD382,
-        LD382A;
+        LD382A,
+        LD686;
     }
 
     public enum Driver {
@@ -173,6 +174,18 @@ public abstract class AbstractWiFiLEDDriver {
 
         outputStream.write(dataWithCS);
         logger.debug("RAW data sent: '{}'", bytesToHex(dataWithCS));
+    }
+
+    protected byte[] getBytesForColor(byte r, byte g, byte b, byte w) {
+        byte[] bytes;
+        if (protocol == Protocol.LD382 || protocol == Protocol.LD382A) {
+            bytes = new byte[] { 0x31, r, g, b, w, 0x00 };
+        } else if (protocol == Protocol.LD686) {
+            bytes = new byte[] { 0x31, r, g, b, w, 0x00, 0x00 };
+        } else {
+            throw new RuntimeException("Protocol " + protocol + " not yet implemented");
+        }
+        return bytes;
     }
 
 }
