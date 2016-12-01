@@ -7,7 +7,15 @@
  */
 package org.openhab.binding.wifiled.discovery;
 
-import static org.openhab.binding.wifiled.WiFiLEDBindingConstants.*;
+import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
+import org.eclipse.smarthome.config.discovery.DiscoveryResult;
+import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
+import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.binding.wifiled.handler.AbstractWiFiLEDDriver;
+import org.openhab.binding.wifiled.handler.ClassicWiFiLEDDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -19,15 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.openhab.binding.wifiled.handler.AbstractWiFiLEDDriver;
-import org.openhab.binding.wifiled.handler.ClassicWiFiLEDDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.openhab.binding.wifiled.WiFiLEDBindingConstants.SUPPORTED_THING_TYPES_UIDS;
+import static org.openhab.binding.wifiled.WiFiLEDBindingConstants.THING_TYPE_WIFILED;
 
 /**
  * The {@link WiFiLEDDiscoveryService} class implements a service
@@ -53,12 +54,7 @@ public class WiFiLEDDiscoveryService extends AbstractDiscoveryService {
     @Override
     protected void startBackgroundDiscovery() {
         logger.debug("Start WiFi LED background discovery");
-        scheduler.schedule(new Runnable() {
-            @Override
-            public void run() {
-                discover();
-            }
-        }, 0, TimeUnit.SECONDS);
+        scheduler.schedule(() -> discover(), 0, TimeUnit.SECONDS);
     }
 
     @Override
@@ -108,26 +104,26 @@ public class WiFiLEDDiscoveryService extends AbstractDiscoveryService {
                 properties.put("ip", ip);
                 properties.put("protocol", AbstractWiFiLEDDriver.Protocol.LD382A);
                 ThingUID uid = new ThingUID(THING_TYPE_WIFILED, mac);
-                if (uid != null) {
-                    DiscoveryResult result = DiscoveryResultBuilder.create(uid).withProperties(properties)
-                            .withLabel(name).build();
-                    thingDiscovered(result);
-                    logger.debug("Thing discovered '{}'", result);
-                }
+
+                DiscoveryResult result = DiscoveryResultBuilder.create(uid)
+                        .withProperties(properties)
+                        .withLabel(name)
+                        .build();
+                thingDiscovered(result);
+                logger.debug("Thing discovered '{}'", result);
             }
         } catch (IOException e) {
             logger.debug("No WiFi LED device found. Diagnostic: {}", e.getMessage());
-            return;
         }
     }
 
-    private static final String bytesToString(byte[] bytes) {
+    private static String bytesToString(byte[] bytes) {
         String s = "";
-        for (int i = 0; i < bytes.length; i++) {
-            if (bytes[i] == 0) {
+        for (byte aByte : bytes) {
+            if (aByte == 0) {
                 break;
             }
-            s += (char) (bytes[i] & 0xFF);
+            s += (char) (aByte & 0xFF);
         }
 
         return s;
