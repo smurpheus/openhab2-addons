@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2015, openHAB.org and others.
+ * Copyright (c) 2014-2016 by the respective copyright holders.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -46,7 +46,7 @@ public enum RFXComValueSelector {
     INSTANT_POWER(RFXComBindingConstants.CHANNEL_INSTANT_POWER, NumberItem.class),
     TOTAL_USAGE(RFXComBindingConstants.CHANNEL_TOTAL_USAGE, NumberItem.class),
     INSTANT_AMPS(RFXComBindingConstants.CHANNEL_INSTANT_AMPS, NumberItem.class),
-    TOTAL_AMP_HOURS(RFXComBindingConstants.CHANNEL_TOTAL_AMP_HOURS, NumberItem.class),
+    TOTAL_AMP_HOUR(RFXComBindingConstants.CHANNEL_TOTAL_AMP_HOUR, NumberItem.class),
     STATUS(RFXComBindingConstants.CHANNEL_STATUS, StringItem.class),
     MOTION(RFXComBindingConstants.CHANNEL_MOTION, SwitchItem.class),
     CONTACT(RFXComBindingConstants.CHANNEL_CONTACT, ContactItem.class),
@@ -73,7 +73,7 @@ public enum RFXComValueSelector {
 
     /**
      * Procedure to validate selector string.
-     * 
+     *
      * @param valueSelector
      *            selector string e.g. Command, Temperature
      * @return true if item is valid.
@@ -102,7 +102,7 @@ public enum RFXComValueSelector {
 
     /**
      * Procedure to convert selector string to value selector class.
-     * 
+     *
      * @param valueSelectorText
      *            selector string e.g. RawData, Command, Temperature
      * @return corresponding selector value.

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014-2015 openHAB UG (haftungsbeschraenkt) and others.
+ * Copyright (c) 2014-2016 by the respective copyright holders.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,6 +9,7 @@
 package org.openhab.binding.max.internal.device;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.smarthome.core.library.types.OnOffType;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * Base class for devices provided by the MAX! protocol.
  *
  * @author Andreas Heil (info@aheil.de)
- * @author Marcel Verpaalen - OH2 update
+ * @author Marcel Verpaalen - OH2 update + enhancements
  * @since 1.4.0
  */
 public abstract class Device {
@@ -31,7 +32,8 @@ public abstract class Device {
     private String serialNumber = "";
     private String rfAddress = "";
     private int roomId = -1;
-    private DeviceConfiguration config;
+    private String roomName = "";
+    private String name = "";
 
     private boolean updated;
     private boolean batteryLow;
@@ -44,46 +46,63 @@ public abstract class Device {
     private boolean gatewayKnown;
     private boolean panelLocked;
     private boolean linkStatusError;
+    private HashMap<String, Object> properties = new HashMap<>();
 
     public Device(DeviceConfiguration c) {
         this.serialNumber = c.getSerialNumber();
         this.rfAddress = c.getRFAddress();
         this.roomId = c.getRoomId();
-        this.config = c;
+        this.roomName = c.getRoomName();
+        this.name = c.getName();
+        this.setProperties(new HashMap<>(c.getProperties()));
     }
 
     public abstract DeviceType getType();
 
     public String getName() {
-        String deviceName = "";
-        if (config.getName() != null) {
-            deviceName = config.getName();
-        }
-        return deviceName;
+        return name;
     }
 
-    private static Device create(String rfAddress, List<DeviceConfiguration> configurations) {
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public static Device create(String rfAddress, List<DeviceConfiguration> configurations) {
         Device returnValue = null;
         for (DeviceConfiguration c : configurations) {
             if (c.getRFAddress().toUpperCase().equals(rfAddress.toUpperCase())) {
-                switch (c.getDeviceType()) {
-                    case HeatingThermostatPlus:
-                    case HeatingThermostat:
-                        HeatingThermostat thermostat = new HeatingThermostat(c);
-                        thermostat.setType(c.getDeviceType());
-                        return thermostat;
-                    case EcoSwitch:
-                        return new EcoSwitch(c);
-                    case ShutterContact:
-                        return new ShutterContact(c);
-                    case WallMountedThermostat:
-                        return new WallMountedThermostat(c);
-                    default:
-                        return new UnsupportedDevice(c);
-                }
+                return create(c);
             }
         }
         return returnValue;
+    }
+
+    /**
+     * Creates a new device
+     *
+     * @param DeviceConfiguration
+     * @return Device
+     */
+    public static Device create(DeviceConfiguration c) {
+        {
+            switch (c.getDeviceType()) {
+                case HeatingThermostatPlus:
+                case HeatingThermostat:
+                    HeatingThermostat thermostat = new HeatingThermostat(c);
+                    thermostat.setType(c.getDeviceType());
+                    return thermostat;
+                case EcoSwitch:
+                    return new EcoSwitch(c);
+                case ShutterContact:
+                    return new ShutterContact(c);
+                case WallMountedThermostat:
+                    return new WallMountedThermostat(c);
+                case Cube:
+                    return new Cube(c);
+                default:
+                    return new UnsupportedDevice(c);
+            }
+        }
     }
 
     public static Device create(byte[] raw, List<DeviceConfiguration> configurations) {
@@ -245,11 +264,11 @@ public abstract class Device {
     }
 
     public final String getRoomName() {
-        String roomName = "";
-        if (config.getRoomName() != null) {
-            roomName = config.getRoomName();
-        }
         return roomName;
+    }
+
+    public final void setRoomName(String roomName) {
+        this.roomName = roomName;
     }
 
     private void setLinkStatusError(boolean linkStatusError) {
@@ -351,6 +370,25 @@ public abstract class Device {
 
     public boolean isLinkStatusError() {
         return linkStatusError;
+    }
+
+    /**
+     * @return the properties
+     */
+    public HashMap<String, Object> getProperties() {
+        return properties;
+    }
+
+    /**
+     * @param properties the properties to set
+     */
+    public void setProperties(HashMap<String, Object> properties) {
+        this.properties = new HashMap<>(properties);
+    }
+
+    @Override
+    public String toString() {
+        return this.getType().toString() + " (" + rfAddress + ") '" + this.getName() + "'";
     }
 
 }

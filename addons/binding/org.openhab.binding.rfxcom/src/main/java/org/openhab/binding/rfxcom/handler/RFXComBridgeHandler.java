@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014-2015 openHAB UG (haftungsbeschraenkt) and others.
+ * Copyright (c) 2014-2016 by the respective copyright holders.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,6 +29,7 @@ import org.openhab.binding.rfxcom.internal.connector.RFXComConnectorInterface;
 import org.openhab.binding.rfxcom.internal.connector.RFXComEventListener;
 import org.openhab.binding.rfxcom.internal.connector.RFXComJD2XXConnector;
 import org.openhab.binding.rfxcom.internal.connector.RFXComSerialConnector;
+import org.openhab.binding.rfxcom.internal.connector.RFXComTcpConnector;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComNotImpException;
 import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage;
@@ -79,6 +80,10 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
     @Override
     public void dispose() {
         logger.debug("Handler disposed.");
+
+        for (DeviceMessageListener deviceStatusListener : deviceStatusListeners) {
+            unregisterDeviceStatusListener(deviceStatusListener);
+        }
 
         if (connector != null) {
             connector.removeEventListener(eventListener);
@@ -138,23 +143,23 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
         logger.debug("Connecting to RFXCOM transceiver");
 
         try {
-            String deviceName = null;
-
             if (configuration.serialPort != null) {
-                deviceName = configuration.serialPort;
                 if (connector == null) {
                     connector = new RFXComSerialConnector();
                 }
             } else if (configuration.bridgeId != null) {
-                deviceName = configuration.bridgeId;
                 if (connector == null) {
                     connector = new RFXComJD2XXConnector();
+                }
+            } else if (configuration.host != null) {
+                if (connector == null) {
+                    connector = new RFXComTcpConnector();
                 }
             }
 
             if (connector != null) {
                 connector.disconnect();
-                connector.connect(deviceName);
+                connector.connect(configuration);
 
                 logger.debug("Reset controller");
                 connector.sendMessage(RFXComMessageFactory.CMD_RESET);
@@ -208,8 +213,19 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
             }
         } catch (NoSuchPortException e) {
             logger.error("Connection to RFXCOM transceiver failed: invalid port");
+        } catch (IOException e) {
+            logger.error("Connection to RFXCOM transceiver failed, reason: {}", e.getMessage());
+            if ("device not opened (3)".equalsIgnoreCase(e.getMessage())) {
+                if (connector instanceof RFXComJD2XXConnector) {
+                    logger.info("Automatically Discovered RFXCOM bridges use FTDI chip driver (D2XX)."
+                            + " Reason for this error normally is related to operating system native FTDI drivers,"
+                            + " which prevent D2XX driver to open device."
+                            + " To solve this problem, uninstall OS FTDI native drivers or add manually universal bridge 'RFXCOM USB Transceiver',"
+                            + " which use normal serial port driver rather than D2XX.");
+                }
+            }
         } catch (Exception e) {
-            logger.error("Connection to RFXCOM transceiver failed: {}", e.getMessage());
+            logger.error("Connection to RFXCOM transceiver failed, reason: {}", e.getMessage());
         } catch (UnsatisfiedLinkError e) {
             logger.error("Error occured when trying to load native library for OS '{}' version '{}', processor '{}'",
                     System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"), e);
@@ -246,6 +262,7 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
                     break;
 
                 case RFXComBindingConstants.BRIDGE_TYPE_MANUAL_BRIDGE:
+                case RFXComBindingConstants.BRIDGE_TYPE_TCP_BRIDGE:
                     if (conf.transceiverType != null) {
                         switch (conf.transceiverType) {
                             case RFXComBindingConstants.TRANSCEIVER_433_92MHz:
@@ -314,7 +331,7 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
             connector.sendMessage(data);
         } catch (IOException e) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
-            throw new RFXComException(e);
+            throw new RFXComException("Send failed, reason: " + e.getMessage(), e);
         }
 
         try {
@@ -390,7 +407,7 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
             } catch (RFXComNotImpException e) {
                 logger.debug("Message not supported, data: {}", DatatypeConverter.printHexBinary(packet));
             } catch (RFXComException e) {
-                logger.error("Error occured during packet receiving, data: {}",
+                logger.error("Error occured during packet receiving, data: {}, cause: {}",
                         DatatypeConverter.printHexBinary(packet), e.getMessage());
             }
 
@@ -408,7 +425,8 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
         if (deviceStatusListener == null) {
             throw new IllegalArgumentException("It's not allowed to pass a null deviceStatusListener.");
         }
-        return deviceStatusListeners.add(deviceStatusListener);
+        return deviceStatusListeners.contains(deviceStatusListener) ? false
+                : deviceStatusListeners.add(deviceStatusListener);
     }
 
     public boolean unregisterDeviceStatusListener(DeviceMessageListener deviceStatusListener) {

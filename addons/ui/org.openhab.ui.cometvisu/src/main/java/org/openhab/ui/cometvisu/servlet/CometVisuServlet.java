@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2014-2015 openHAB UG (haftungsbeschraenkt) and others.
+ * Copyright (c) 2014-2016 by the respective copyright holders.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -215,7 +216,10 @@ public class CometVisuServlet extends HttpServlet {
 
                     return;
                 } else {
-                    throw new ServletException("Sitemap '" + matcher.group(1) + "' could not be found");
+                    logger.debug("Config file not found. Neither as normal config ('{}') nor as sitemap ('{}.sitemap')",
+                            requestedFile, matcher.group(2));
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    return;
                 }
             }
         }
@@ -385,7 +389,7 @@ public class CometVisuServlet extends HttpServlet {
                     }
                     if (it.hasNext()) {
                         logger.debug("persisted data for item {} found in service {}", item.getName(),
-                                persistenceService.getName());
+                                persistenceService.getId());
                     }
 
                     // Iterate through the data
@@ -421,7 +425,7 @@ public class CometVisuServlet extends HttpServlet {
                         }
                         feed.entries.add(entry);
                     }
-                    if ("rrd4j".equals(persistenceService.getName())
+                    if ("rrd4j".equals(persistenceService.getId())
                             && FilterCriteria.Ordering.DESCENDING.equals(filter.getOrdering())) {
                         // the RRD4j PersistenceService does not support descending ordering so we do it manually
                         Collections.sort(feed.entries,
@@ -434,7 +438,7 @@ public class CometVisuServlet extends HttpServlet {
                                 });
                     }
                     logger.debug("querying {} item from {} to {} => {} results on service {}", filter.getItemName(),
-                            filter.getBeginDate(), filter.getEndDate(), i, persistenceService.getName());
+                            filter.getBeginDate(), filter.getEndDate(), i, persistenceService.getId());
                 }
                 if (request.getParameter("j") != null) {
                     // request data in JSON format
@@ -682,8 +686,6 @@ public class CometVisuServlet extends HttpServlet {
             disposition = accept != null && accepts(accept, contentType) ? "inline" : "attachment";
         }
 
-        // Initialize response.
-        response.reset();
         response.setBufferSize(DEFAULT_BUFFER_SIZE);
         response.setHeader("Content-Disposition", disposition + ";filename=\"" + fileName + "\"");
         response.setHeader("Accept-Ranges", "bytes");

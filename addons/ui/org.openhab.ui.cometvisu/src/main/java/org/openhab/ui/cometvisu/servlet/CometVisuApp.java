@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2014-2015 openHAB UG (haftungsbeschraenkt) and others.
+ * Copyright (c) 2014-2016 by the respective copyright holders.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,12 +77,12 @@ public class CometVisuApp {
 
     public void addPersistenceService(PersistenceService service) {
         if (service instanceof QueryablePersistenceService) {
-            persistenceServices.put(service.getName(), (QueryablePersistenceService) service);
+            persistenceServices.put(service.getId(), (QueryablePersistenceService) service);
         }
     }
 
     public void removePersistenceService(PersistenceService service) {
-        persistenceServices.remove(service.getName());
+        persistenceServices.remove(service.getId());
     }
 
     static public Map<String, QueryablePersistenceService> getPersistenceServices() {

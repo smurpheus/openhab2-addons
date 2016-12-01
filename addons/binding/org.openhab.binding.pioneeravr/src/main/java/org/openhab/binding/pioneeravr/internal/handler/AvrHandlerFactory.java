@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014-2015 openHAB UG (haftungsbeschraenkt) and others.
+ * Copyright (c) 2014-2016 by the respective copyright holders.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,13 +22,14 @@ import com.google.common.collect.Sets;
 
 /**
  * The {@link AvrHandlerFactory} is responsible for creating things and thing handlers.
- * 
+ *
  * @author Antoine Besnard - Initial contribution
  */
 public class AvrHandlerFactory extends BaseThingHandlerFactory {
 
-    private final static Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Sets
-            .newHashSet(PioneerAvrBindingConstants.IP_AVR_THING_TYPE, PioneerAvrBindingConstants.SERIAL_AVR_THING_TYPE);
+    private final static Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Sets.newHashSet(
+            PioneerAvrBindingConstants.IP_AVR_THING_TYPE, PioneerAvrBindingConstants.IP_AVR_UNSUPPORTED_THING_TYPE,
+            PioneerAvrBindingConstants.SERIAL_AVR_THING_TYPE);
 
     protected void activate(ComponentContext componentContext, Map<String, Object> configProps) {
         super.activate(componentContext);
@@ -45,7 +46,8 @@ public class AvrHandlerFactory extends BaseThingHandlerFactory {
 
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
-        if (thingTypeUID.equals(PioneerAvrBindingConstants.IP_AVR_THING_TYPE)) {
+        if (thingTypeUID.equals(PioneerAvrBindingConstants.IP_AVR_THING_TYPE)
+                || thingTypeUID.equals(PioneerAvrBindingConstants.IP_AVR_UNSUPPORTED_THING_TYPE)) {
             return new IpAvrHandler(thing);
         } else if (thingTypeUID.equals(PioneerAvrBindingConstants.SERIAL_AVR_THING_TYPE)) {
             return new SerialAvrHandler(thing);
