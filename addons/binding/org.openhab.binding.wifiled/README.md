@@ -33,15 +33,27 @@ The thing can be configured through the Paper UI.
 Use the configuration if you have devices of type LD382 or LD686, want to enable color fading,
 or if the device discovery does not find your LED controller automatically.
 
-### Color Fading / Driver
+### Drivers
 
-The color fading can be enabled by selecting the "FADING" driver.
-If selected you can also set the number of fading steps and the fading duration.
+You can choose between two drivers with different functionality:
+
+| Driver  | Color Fading Supported | Programs Supported | Polls LED State |
+|---------|:----------------------:|:------------------:|:---------------:|
+| CLASSIC |            -           |         x          |        x        |
+| FADING  |            x           |         -          |        -        |
+
+While the CLASSIC driver let you choose and run device internal programs (e.g. alternating blue),
+all normal operations (turn on or off, switch color, set brightness, ...) are performed immediately
+and without any fading effect.
+
+If you prefer to switch colors smoothly and to turn your light on and off by slightly rising/decreasing the brightness
+you should try the FADING driver.
+If selected you can also set the number of fading steps and the fading duration in the thing configuration.
 Note that each fading step will at least take 10 ms for being processed.
-This natural limit is given by the speed of the LED controller.
-Thus, a color fading with a configured fading duration of 0 might still take some time (count with more than 1 second for 100 steps).
+This natural limit is given by the speed of the LED controller and your network speed.
+Thus, a color fading with a configured fading duration of 0s might still take some time
+(count with more than 1 second for 100 steps).
 IF the "FADING" driver is chosen the program channel and the programSpeed channel will not have any effect.
-If you want to use the those functions you should use the "CLASSIC" driver.
 
 The polling period is a parameter only used by the CLASSIC driver and specifies a the time in seconds
 after the LED state is refreshed in openHAB.
