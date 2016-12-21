@@ -13,9 +13,9 @@ package org.openhab.binding.wifiled.handler;
 public class LEDState {
 
     public final int state, program, programSpeed;
-    public final int red, green, blue, white;
+    public final int red, green, blue, white, white2;
 
-    public LEDState(int state, int program, int programSpeed, int red, int green, int blue, int white) {
+    public LEDState(int state, int program, int programSpeed, int red, int green, int blue, int white, int white2) {
         this.state = state;
         this.program = program;
         this.programSpeed = programSpeed;
@@ -23,6 +23,7 @@ public class LEDState {
         this.green = green;
         this.blue = blue;
         this.white = white;
+        this.white2 = white2;
     }
 
 }

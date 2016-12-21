@@ -36,7 +36,7 @@ public class ClassicWiFiLEDDriver extends AbstractWiFiLEDDriver {
             throw new IOException(e);
         }
 
-        return LEDStateDTO.valueOf(s.state, s.program, s.programSpeed, s.red, s.green, s.blue, s.white);
+        return LEDStateDTO.valueOf(s.state, s.program, s.programSpeed, s.red, s.green, s.blue, s.white, s.white2);
     }
 
     @Override
@@ -76,6 +76,22 @@ public class ClassicWiFiLEDDriver extends AbstractWiFiLEDDriver {
         logger.debug("Changing white by {}", step);
 
         LEDStateDTO ledState = getLEDStateDTO().withIncrementedWhite(step).withoutProgram();
+        sendLEDData(ledState);
+    }
+
+    @Override
+    public void setWhite2(PercentType white2) throws IOException {
+        logger.debug("Setting (warm) white 2 LED to {}", white2);
+
+        LEDStateDTO ledState = getLEDStateDTO().withWhite2(white2).withoutProgram();
+        sendLEDData(ledState);
+    }
+
+    @Override
+    public void incWhite2(int step) throws IOException {
+        logger.debug("Changing white by {}", step);
+
+        LEDStateDTO ledState = getLEDStateDTO().withIncrementedWhite2(step).withoutProgram();
         sendLEDData(ledState);
     }
 
@@ -124,8 +140,9 @@ public class ClassicWiFiLEDDriver extends AbstractWiFiLEDDriver {
             byte g = (byte) (ledState.getColor().getGreen() & 0xFF);
             byte b = (byte) (ledState.getColor().getBlue() & 0xFF);
             byte w = (byte) (((int) (ledState.getWhite().doubleValue() * 255 / 100)) & 0xFF);
+            byte w2 = (byte) (((int) (ledState.getWhite2().doubleValue() * 255 / 100)) & 0xFF);
 
-            byte[] bytes = getBytesForColor(r, g, b, w);
+            byte[] bytes = getBytesForColor(r, g, b, w, w2);
 
             sendRaw(bytes);
         } else {

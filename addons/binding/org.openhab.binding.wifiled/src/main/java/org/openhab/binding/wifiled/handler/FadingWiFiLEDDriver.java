@@ -37,7 +37,7 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
     private InternalLedState currentState = new InternalLedState();
     private InternalLedState targetState = new InternalLedState();
     private InternalLedState realTargetState = new InternalLedState();
-    private LEDStateDTO dtoState = LEDStateDTO.valueOf(0, 0, 0, 0, 0, 0, 0);
+    private LEDStateDTO dtoState = LEDStateDTO.valueOf(0, 0, 0, 0, 0, 0, 0, 0);
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private final int fadeDurationInMs;
     private final int fadeSteps;
@@ -53,9 +53,9 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
     public void init() throws IOException {
         try {
             LEDState s = getLEDState();
-            dtoState = LEDStateDTO.valueOf(s.state, s.program, s.programSpeed, s.red, s.green, s.blue, s.white);
+            dtoState = LEDStateDTO.valueOf(s.state, s.program, s.programSpeed, s.red, s.green, s.blue, s.white, s.white2);
             power = (s.state & 0x01) != 0;
-            currentState = InternalLedState.fromRGBW(s.red, s.green, s.blue, s.white);
+            currentState = InternalLedState.fromRGBW(s.red, s.green, s.blue, s.white, s.white2);
         } catch (IOException ignored) {
         }
     }
@@ -97,9 +97,15 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
     }
 
     @Override
-    public void decWhite(int step) throws IOException {
-        dtoState = dtoState.withIncrementedWhite(-step);
-        changeState(targetState.withWhite(currentState.getWhite() - ((double) step / 100)));
+    public void setWhite2(PercentType white2) throws IOException {
+        dtoState = dtoState.withWhite2(white2);
+        changeState(targetState.withWhite2(white2.doubleValue() / 100));
+    }
+
+    @Override
+    public void incWhite2(int step) throws IOException {
+        dtoState = dtoState.withIncrementedWhite2(step);
+        changeState(targetState.withWhite2(currentState.getWhite2() + ((double) step / 100)));
     }
 
     @Override
@@ -179,14 +185,15 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
         logger.debug("Setting LED State to {}", ledState);
 
         // "normal" program: set color etc.
-        byte r = (byte) (ledState.getR() & 0xFF);
-        byte g = (byte) (ledState.getG() & 0xFF);
-        byte b = (byte) (ledState.getB() & 0xFF);
-        byte w = (byte) (ledState.getW() & 0xFF);
+        byte r  = (byte) (ledState.getR()  & 0xFF);
+        byte g  = (byte) (ledState.getG()  & 0xFF);
+        byte b  = (byte) (ledState.getB()  & 0xFF);
+        byte w  = (byte) (ledState.getW()  & 0xFF);
+        byte w2 = (byte) (ledState.getW2() & 0xFF);
 
-        logger.info("RGBW: {}, {}, {}, {}", r, g, b, w);
+        logger.info("RGBW: {}, {}, {}, {}, {}", r, g, b, w, w2);
 
-        byte[] bytes = getBytesForColor(r, g, b, w);
+        byte[] bytes = getBytesForColor(r, g, b, w, w2);
         sendRaw(bytes, out);
     }
 

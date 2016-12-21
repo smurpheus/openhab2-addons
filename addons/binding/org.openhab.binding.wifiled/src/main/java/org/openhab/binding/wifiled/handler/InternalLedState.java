@@ -21,22 +21,23 @@ public class InternalLedState {
 
     /** Values for the colors red, green, blue from 0 to 1. */
     double r, g, b;
-    /** White value from 0 to 1. */
-    double w;
+    /** White values from 0 to 1. */
+    double w, w2;
 
     public InternalLedState() {
-        this(0, 0, 0, 0);
+        this(0, 0, 0, 0, 0);
     }
 
-    public InternalLedState(double r, double g, double b, double w) {
+    public InternalLedState(double r, double g, double b, double w, double w2) {
         this.r = r;
         this.g = g;
         this.b = b;
         this.w = w;
+        this.w2 = w2;
     }
 
-    public static InternalLedState fromRGBW(int r, int g, int b, int w) {
-        return new InternalLedState(conv(r), conv(g), conv(b), conv(w));
+    public static InternalLedState fromRGBW(int r, int g, int b, int w, int w2) {
+        return new InternalLedState(conv(r), conv(g), conv(b), conv(w), conv(w2));
     }
 
     public InternalLedState withColor(HSBType color) {
@@ -44,7 +45,8 @@ public class InternalLedState {
             color.getRed().doubleValue()   / 100,
             color.getGreen().doubleValue() / 100,
             color.getBlue().doubleValue()  / 100,
-            w
+            w,
+            w2
         );
     }
 
@@ -53,7 +55,8 @@ public class InternalLedState {
             r * brightness,
             g * brightness,
             b * brightness,
-            w
+            w,
+            w2
         );
     }
 
@@ -62,7 +65,18 @@ public class InternalLedState {
             r,
             g,
             b,
-            w
+            w,
+            w2
+        );
+    }
+
+    public InternalLedState withWhite2(double w2) {
+        return new InternalLedState(
+            r,
+            g,
+            b,
+            w,
+            w2
         );
     }
 
@@ -87,7 +101,8 @@ public class InternalLedState {
             this.r * invProgress + that.r * progress,
             this.g * invProgress + that.g * progress,
             this.b * invProgress + that.b * progress,
-            this.w * invProgress + that.w * progress
+            this.w * invProgress + that.w * progress,
+            this.w2 * invProgress + that.w2 * progress
         );
     }
 
@@ -107,6 +122,15 @@ public class InternalLedState {
      */
     public double getWhite() {
         return w;
+    }
+
+    /**
+     * Returns the white2 value.
+     *
+     * @return value between 0 and 1
+     */
+    public double getWhite2() {
+        return w2;
     }
 
     private static double conv(int v) {
@@ -153,6 +177,15 @@ public class InternalLedState {
         return conv(w);
     }
 
+    /**
+     * Returns white2 value.
+     *
+     * @return value between 0 and 255
+     */
+    public int getW2() {
+        return conv(w2);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -190,4 +223,5 @@ public class InternalLedState {
             ", w=" + w +
             '}';
     }
+
 }

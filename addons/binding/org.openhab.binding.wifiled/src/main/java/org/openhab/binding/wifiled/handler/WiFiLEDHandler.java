@@ -113,6 +113,8 @@ public class WiFiLEDHandler extends BaseThingHandler {
                 handleColorCommand(command);
             } else if (channelUID.getId().equals(WiFiLEDBindingConstants.CHANNEL_WHITE)) {
                 handleWhiteCommand(command);
+            } else if (channelUID.getId().equals(WiFiLEDBindingConstants.CHANNEL_WHITE2)) {
+                handleWhite2Command(command);
             } else if (channelUID.getId().equals(WiFiLEDBindingConstants.CHANNEL_PROGRAM)
                     && (command instanceof StringType)) {
                 driver.setProgram((StringType) command);
@@ -157,6 +159,26 @@ public class WiFiLEDHandler extends BaseThingHandler {
                 driver.incWhite(INC_DEC_STEP);
             } else {
                 driver.decWhite(INC_DEC_STEP);
+            }
+        }
+    }
+
+    private void handleWhite2Command(Command command) throws IOException {
+        if (command instanceof PercentType) {
+            driver.setWhite2((PercentType) command);
+        } else if (command instanceof OnOffType) {
+            OnOffType onOffCommand = (OnOffType) command;
+            if (onOffCommand.equals(OnOffType.ON)) {
+                driver.setWhite2(PercentType.HUNDRED);
+            } else {
+                driver.setWhite2(PercentType.ZERO);
+            }
+        } else if (command instanceof IncreaseDecreaseType) {
+            IncreaseDecreaseType increaseDecreaseType = (IncreaseDecreaseType) command;
+            if (increaseDecreaseType.equals(IncreaseDecreaseType.INCREASE)) {
+                driver.incWhite2(INC_DEC_STEP);
+            } else {
+                driver.decWhite2(INC_DEC_STEP);
             }
         }
     }

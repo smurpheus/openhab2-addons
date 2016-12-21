@@ -4,7 +4,16 @@ This binding is used to control LED stripes connected by WiFi. These devices are
 
 ## Supported Things
 
-This binding supports RGB(W) LED devices of type LD382A, LD382, and LD686.
+The following table shows a list of RGBW(W) LED devices supported by this binding.
+
+Device table with supported channels:
+
+| Device Type | power | color | white | white2 | program | programSpeed |
+|-------------|:-----:|:-----:|:-----:|:------:|:-------:|:------------:|
+| LD382       |   x   |   x   |   x   |   -    |    x    |      x       |
+| LD382A      |   x   |   x   |   x   |   -    |    x    |      x       |
+| LD686       |   x   |   x   |   x   |   x    |    x    |      x       |
+
 Other LD*** devices might work but probably need some small adaptions.
 
 ## Discovery
@@ -44,13 +53,13 @@ Moreover, make sure that the device protocol matches you device type.
 
 ## Channels
 
-| Channel Type ID | Item Type | Description                         | Access |
-|-----------------|-----------|-------------------------------------|--------|
-| power           | Switch    | Power state of the LEDs (ON/OFF)    | R/W    |
-| color           | Color     | Color of the RGB LEDs               | R/W    |
-| white           | Dimmer    | Brightness of the (warm) white LEDs | R/W    |
+| Channel Type ID | Item Type | Description                                          | Access |
+|-----------------|-----------|------------------------------------------------------|--------|
+| power           | Switch    | Power state of the LEDs (ON/OFF)                     | R/W    |
+| color           | Color     | Color of the RGB LEDs                                | R/W    |
+| white           | Dimmer    | Brightness of the (warm) white LEDs (min=0, max=100) | R/W    |
 | program         | String    | Program to run by the controller (i.e. color cross fade, strobe, etc.) | R/W |
-| programSpeed    | Dimmer    | Speed of the program                | R/W    |
+| programSpeed    | Dimmer    | Speed of the program                                 | R/W    |
 
 ## Full example
 

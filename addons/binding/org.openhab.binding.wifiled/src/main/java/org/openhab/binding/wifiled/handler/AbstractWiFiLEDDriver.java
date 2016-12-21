@@ -73,6 +73,14 @@ public abstract class AbstractWiFiLEDDriver {
         incWhite(-step);
     }
 
+    public abstract void setWhite2(PercentType white2) throws IOException;
+
+    public abstract void incWhite2(int step) throws IOException;
+
+    public void decWhite2(int step) throws IOException {
+        incWhite2(-step);
+    }
+
     public abstract void setProgram(StringType program) throws IOException;
 
     public abstract void setProgramSpeed(PercentType speed) throws IOException;
@@ -121,10 +129,11 @@ public abstract class AbstractWiFiLEDDriver {
             int green = statusBytes[7] & 0xFF;
             int blue = statusBytes[8] & 0xFF;
             int white = statusBytes[9] & 0xFF;
+            int white2 = protocol == Protocol.LD686 ? statusBytes[10] & 0xFF : 0;
 
-            logger.debug("RGBW: {},{},{},{}", red, green, blue, white);
+            logger.debug("RGBW: {},{},{},{}, {}", red, green, blue, white, white2);
 
-            return new LEDState(state, program, programSpeed, red, green, blue, white);
+            return new LEDState(state, program, programSpeed, red, green, blue, white, white2);
         } catch (Exception e) {
             throw new IOException(e);
         }
@@ -176,12 +185,12 @@ public abstract class AbstractWiFiLEDDriver {
         logger.debug("RAW data sent: '{}'", bytesToHex(dataWithCS));
     }
 
-    protected byte[] getBytesForColor(byte r, byte g, byte b, byte w) {
+    protected byte[] getBytesForColor(byte r, byte g, byte b, byte w, byte w2) {
         byte[] bytes;
         if (protocol == Protocol.LD382 || protocol == Protocol.LD382A) {
             bytes = new byte[] { 0x31, r, g, b, w, 0x00 };
         } else if (protocol == Protocol.LD686) {
-            bytes = new byte[] { 0x31, r, g, b, w, 0x00, 0x00 };
+            bytes = new byte[] { 0x31, r, g, b, w, w2, 0x00 };
         } else {
             throw new RuntimeException("Protocol " + protocol + " not yet implemented");
         }

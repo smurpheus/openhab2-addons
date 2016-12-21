@@ -31,6 +31,7 @@ public class WiFiLEDBindingConstants {
     public static final String CHANNEL_POWER = "power";
     public static final String CHANNEL_COLOR = "color";
     public static final String CHANNEL_WHITE = "white";
+    public static final String CHANNEL_WHITE2 = "white2";
     public static final String CHANNEL_PROGRAM = "program";
     public static final String CHANNEL_PROGRAM_SPEED = "programSpeed";
 
