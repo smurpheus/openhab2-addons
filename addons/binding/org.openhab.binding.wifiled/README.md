@@ -10,9 +10,9 @@ Device table with supported channels:
 
 | Device Type | power | color | white | white2 | program | programSpeed |
 |-------------|:-----:|:-----:|:-----:|:------:|:-------:|:------------:|
-| LD382       |   x   |   x   |   x   |   -    |    x    |      x       |
-| LD382A      |   x   |   x   |   x   |   -    |    x    |      x       |
-| LD686       |   x   |   x   |   x   |   x    |    x    |      x       |
+| LD382       |   ✓   |   ✓   |   ✓   |        |    ✓    |      ✓       |
+| LD382A      |   ✓   |   ✓   |   ✓   |        |    ✓    |      ✓       |
+| LD686       |   ✓   |   ✓   |   ✓   |   ✓    |    ✓    |      ✓       |
 
 Other LD*** devices might work but probably need some small adaptions.
 
@@ -37,10 +37,10 @@ or if the device discovery does not find your LED controller automatically.
 
 You can choose between two drivers with different functionality:
 
-| Driver  | Color Fading Supported | Programs Supported | Polls LED State |
-|---------|:----------------------:|:------------------:|:---------------:|
-| CLASSIC |            -           |         x          |        x        |
-| FADING  |            x           |         -          |        -        |
+| Driver  | Supports Color Fading | Supports Programs | Polls LED State |
+|---------|:---------------------:|:-----------------:|:---------------:|
+| CLASSIC |                       |         ✓         |        ✓        |
+| FADING  |            ✓          |                   |                 |
 
 While the CLASSIC driver let you choose and run device internal programs (e.g. alternating blue),
 all normal operations (turn on or off, switch color, set brightness, ...) are performed immediately
