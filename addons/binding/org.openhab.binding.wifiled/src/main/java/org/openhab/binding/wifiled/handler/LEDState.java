@@ -8,7 +8,7 @@
 package org.openhab.binding.wifiled.handler;
 
 /**
- * @author Stefan Endrullis &lt;stefan@endrullis.de&gt;
+ * @author Stefan Endrullis
  */
 public class LEDState {
 

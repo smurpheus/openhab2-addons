@@ -15,7 +15,7 @@ import static java.lang.Math.max;
 /**
  * Internal LED state.
  *
- * @author Stefan Endrullis &lt;stefan@endrullis.de&gt;
+ * @author Stefan Endrullis
  */
 public class InternalLedState {
 

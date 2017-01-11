@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  * The {@link FadingWiFiLEDDriver} class is responsible for the communication with the WiFi LED controller.
  * It utilizes color fading when changing colors or turning the light on of off.
  *
- * @author Stefan Endrullis &lt;stefan@endrullis.de&gt;
+ * @author Stefan Endrullis
  */
 public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
 

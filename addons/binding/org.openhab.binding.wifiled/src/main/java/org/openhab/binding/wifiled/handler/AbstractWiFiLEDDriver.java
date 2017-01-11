@@ -25,7 +25,7 @@ import static org.openhab.binding.wifiled.handler.ClassicWiFiLEDDriver.bytesToHe
  * Abstract WiFi LED driver.
  *
  * @author Osman Basha - Initial contribution
- * @author Stefan Endrullis &lt;stefan@endrullis.de&gt;
+ * @author Stefan Endrullis
  */
 public abstract class AbstractWiFiLEDDriver {
 
