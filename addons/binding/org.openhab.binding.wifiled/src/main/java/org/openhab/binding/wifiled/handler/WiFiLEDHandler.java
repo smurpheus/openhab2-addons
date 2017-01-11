@@ -82,14 +82,6 @@ public class WiFiLEDHandler extends BaseThingHandler {
         logger.debug("Polling job scheduled to run every {} sec. for '{}'", pollingPeriod, getThing().getUID());
     }
 
-/*
-    @Override
-    public void postInitialize() {
-        super.postInitialize();
-        update();
-    }
-*/
-
     @Override
     public void dispose() {
         logger.debug("Disposing WiFiLED handler '{}'", getThing().getUID());
