@@ -69,7 +69,8 @@ Moreover, make sure that the device protocol matches you device type.
 |-----------------|-----------|------------------------------------------------------|--------|
 | power           | Switch    | Power state of the LEDs (ON/OFF)                     | R/W    |
 | color           | Color     | Color of the RGB LEDs                                | R/W    |
-| white           | Dimmer    | Brightness of the (warm) white LEDs (min=0, max=100) | R/W    |
+| white           | Dimmer    | Brightness of the first (warm) white LEDs (min=0, max=100) | R/W    |
+| white2          | Dimmer    | Brightness of the second (warm) white LEDs (min=0, max=100) | R/W    |
 | program         | String    | Program to run by the controller (i.e. color cross fade, strobe, etc.) | R/W |
 | programSpeed    | Dimmer    | Speed of the program                                 | R/W    |
 
