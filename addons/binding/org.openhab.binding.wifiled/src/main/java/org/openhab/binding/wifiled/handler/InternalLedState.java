@@ -85,8 +85,6 @@ public class InternalLedState {
         return HSBType.fromRGB(conv(r), conv(g), conv(b));
     }
 
-
-
     /**
      * Fades from this color to the that color according to the given progress value from 0 (this color)
      * to 1 (that color).
