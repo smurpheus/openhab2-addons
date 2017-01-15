@@ -36,6 +36,7 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
     private boolean power = false;
     private InternalLedState blackState = new InternalLedState();
     private InternalLedState currentState = new InternalLedState();
+    private InternalLedState currentTargetState = new InternalLedState();
     private InternalLedState targetState = new InternalLedState();
     private InternalLedState realTargetState = new InternalLedState();
     private LEDStateDTO dtoState = LEDStateDTO.valueOf(0, 0, 0, 0, 0, 0, 0, 0);
@@ -56,7 +57,7 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
             LEDState s = getLEDState();
             dtoState = LEDStateDTO.valueOf(s.state, s.program, s.programSpeed, s.red, s.green, s.blue, s.white, s.white2);
             power = (s.state & 0x01) != 0;
-            currentState = InternalLedState.fromRGBW(s.red, s.green, s.blue, s.white, s.white2);
+            currentTargetState = InternalLedState.fromRGBW(s.red, s.green, s.blue, s.white, s.white2);
         } catch (IOException ignored) {
         }
     }
@@ -76,13 +77,13 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
     @Override
     public void incBrightness(int step) throws IOException {
         dtoState = dtoState.withIncrementedBrightness(step);
-        changeState(targetState.withBrightness(currentState.getBrightness() + ((double) step / 100)));
+        changeState(targetState.withBrightness(currentTargetState.getBrightness() + ((double) step / 100)));
     }
 
     @Override
     public void decBrightness(int step) throws IOException {
         dtoState = dtoState.withIncrementedBrightness(-step);
-        changeState(targetState.withBrightness(currentState.getBrightness() - ((double) step / 100)));
+        changeState(targetState.withBrightness(currentTargetState.getBrightness() - ((double) step / 100)));
     }
 
     @Override
@@ -94,7 +95,7 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
     @Override
     public void incWhite(int step) throws IOException {
         dtoState = dtoState.withIncrementedWhite(step);
-        changeState(targetState.withWhite(currentState.getWhite() + ((double) step / 100)));
+        changeState(targetState.withWhite(currentTargetState.getWhite() + ((double) step / 100)));
     }
 
     @Override
@@ -106,7 +107,7 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
     @Override
     public void incWhite2(int step) throws IOException {
         dtoState = dtoState.withIncrementedWhite2(step);
-        changeState(targetState.withWhite2(currentState.getWhite2() + ((double) step / 100)));
+        changeState(targetState.withWhite2(currentTargetState.getWhite2() + ((double) step / 100)));
     }
 
     @Override
@@ -146,7 +147,7 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
             realTargetState = newState;
 
             executorService.schedule(() -> {
-                if (currentState.equals(newState)) return;
+                if (currentTargetState.equals(newState)) return;
 
                 keepFading = true;
 
@@ -156,11 +157,11 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
                     socket.setSoTimeout(DEFAULT_SOCKET_TIMEOUT);
 
                     try (DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream())) {
-                        InternalLedState fadeState = currentState;
+                        InternalLedState fadeState = currentTargetState;
 
                         for (int i = 1; i <= fadeSteps && keepFading; i++) {
                             long lastTime = System.nanoTime();
-                            fadeState = currentState.fade(newState, (double) i / fadeSteps);
+                            fadeState = currentTargetState.fade(newState, (double) i / fadeSteps);
                             logger.debug("fadeState: " + fadeState);
 
                             sendLEDData(fadeState, outputStream);
@@ -168,7 +169,7 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
                             busySleep(fadeDurationInMs / fadeSteps, lastTime);
                         }
 
-                        currentState = fadeState;
+                        currentTargetState = fadeState;
                     }
                 } catch (NoRouteToHostException e) {
                     e.printStackTrace();
@@ -185,17 +186,21 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
     private void sendLEDData(InternalLedState ledState, DataOutputStream out) throws IOException {
         logger.debug("Setting LED State to {}", ledState);
 
-        // "normal" program: set color etc.
-        byte r  = (byte) (ledState.getR()  & 0xFF);
-        byte g  = (byte) (ledState.getG()  & 0xFF);
-        byte b  = (byte) (ledState.getB()  & 0xFF);
-        byte w  = (byte) (ledState.getW()  & 0xFF);
-        byte w2 = (byte) (ledState.getW2() & 0xFF);
+        if (!ledState.equals(currentState)) {
+            // "normal" program: set color etc.
+            byte r  = (byte) (ledState.getR()  & 0xFF);
+            byte g  = (byte) (ledState.getG()  & 0xFF);
+            byte b  = (byte) (ledState.getB()  & 0xFF);
+            byte w  = (byte) (ledState.getW()  & 0xFF);
+            byte w2 = (byte) (ledState.getW2() & 0xFF);
 
-        logger.info("RGBW: {}, {}, {}, {}, {}", r, g, b, w, w2);
+            logger.info("RGBW: {}, {}, {}, {}, {}", r, g, b, w, w2);
 
-        byte[] bytes = getBytesForColor(r, g, b, w, w2);
-        sendRaw(bytes, out);
+            byte[] bytes = getBytesForColor(r, g, b, w, w2);
+            sendRaw(bytes, out);
+        }
+
+        currentState = ledState;
     }
 
     private static void busySleep(final long nanos, final long startTime) {
