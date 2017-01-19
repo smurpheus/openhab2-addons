@@ -166,7 +166,7 @@ public abstract class AbstractWiFiLEDDriver {
         byte[] dataWithCS;
 
         // append 0x0F (if dev.type LD382A)
-        if (protocol.equals(Protocol.LD382A)) {
+        if (protocol == Protocol.LD382A || protocol == Protocol.LD686) {
             dataWithCS = new byte[data.length + 2];
             dataWithCS[dataWithCS.length - 2] = 0x0F;
         } else {
@@ -196,6 +196,10 @@ public abstract class AbstractWiFiLEDDriver {
             throw new RuntimeException("Protocol " + protocol + " not yet implemented");
         }
         return bytes;
+    }
+
+    protected byte[] getBytesForPower(boolean on) {
+        return new byte[]{ 0x71, on ? (byte) 0x23 : 0x24 };
     }
 
 }

@@ -21,18 +21,26 @@ import java.io.IOException;
  */
 public class WiFiLEDHandlerTestApp {
 
-	private static FadingWiFiLEDDriver driver;
+	private static AbstractWiFiLEDDriver driver;
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		driver = new FadingWiFiLEDDriver(
-				"192.168.178.89",
-				AbstractWiFiLEDDriver.DEFAULT_PORT,
-				AbstractWiFiLEDDriver.Protocol.LD382A,
-				1000,
-				100
-		);
+		String ip = "192.168.178.91";
+		Integer port = AbstractWiFiLEDDriver.DEFAULT_PORT;
+		AbstractWiFiLEDDriver.Protocol protocol = AbstractWiFiLEDDriver.Protocol.LD686;
+
+		boolean fadingDriver = false;
+
+		System.out.println("start");
+
+		driver = fadingDriver ?
+			new FadingWiFiLEDDriver(ip, port, protocol, 0, 1) :
+			new ClassicWiFiLEDDriver(ip, port, protocol);
+
+		System.out.println("driver created");
 
 		driver.init();
+
+		System.out.println("driver initialized");
 
 		testStateChanges();
 		//testFrequentStateChanges();
@@ -41,6 +49,12 @@ public class WiFiLEDHandlerTestApp {
 	}
 
 	private static void testStateChanges() throws IOException, InterruptedException {
+		driver.setPower(OnOffType.OFF);
+
+		System.out.println("off");
+
+		Thread.sleep(500);
+
 		driver.setPower(OnOffType.ON);
 		driver.setWhite(PercentType.HUNDRED);
 		assertState("ON,0,0,0,100");

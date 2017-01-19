@@ -100,8 +100,7 @@ public class ClassicWiFiLEDDriver extends AbstractWiFiLEDDriver {
     public void setPower(OnOffType command) throws IOException {
         logger.debug("Power " + command.name());
 
-        byte[] data = { 0x71, command == OnOffType.ON ? (byte) 0x23 : 0x24 };
-        sendRaw(data);
+        sendRaw(getBytesForPower(command == OnOffType.ON));
     }
 
     @Override

@@ -157,6 +157,9 @@ public class FadingWiFiLEDDriver extends AbstractWiFiLEDDriver {
                     socket.setSoTimeout(DEFAULT_SOCKET_TIMEOUT);
 
                     try (DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream())) {
+                        // ensure controller is on
+                        sendRaw(getBytesForPower(true), outputStream);
+
                         InternalLedState fadeState = currentTargetState;
 
                         for (int i = 1; i <= fadeSteps && keepFading; i++) {
