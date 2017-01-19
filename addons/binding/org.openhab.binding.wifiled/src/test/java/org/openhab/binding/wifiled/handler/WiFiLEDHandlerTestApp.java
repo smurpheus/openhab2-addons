@@ -17,7 +17,7 @@ import java.io.IOException;
 /**
  * Test app for the fading driver.
  *
- * @author Stefan Endrullis &lt;stefan@endrullis.de&gt;
+ * @author Stefan Endrullis
  */
 public class WiFiLEDHandlerTestApp {
 
