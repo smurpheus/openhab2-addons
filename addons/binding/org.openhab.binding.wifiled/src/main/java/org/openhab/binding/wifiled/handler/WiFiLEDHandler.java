@@ -78,8 +78,10 @@ public class WiFiLEDHandler extends BaseThingHandler {
         updateStatus(ThingStatus.ONLINE);
 
         int pollingPeriod = (config.getPollingPeriod() == null) ? 30 : config.getPollingPeriod();
-        pollingJob = scheduler.scheduleWithFixedDelay(() -> update(), 0, pollingPeriod, TimeUnit.SECONDS);
-        logger.debug("Polling job scheduled to run every {} sec. for '{}'", pollingPeriod, getThing().getUID());
+        if (pollingPeriod > 0) {
+            pollingJob = scheduler.scheduleWithFixedDelay(() -> update(), 0, pollingPeriod, TimeUnit.SECONDS);
+            logger.debug("Polling job scheduled to run every {} sec. for '{}'", pollingPeriod, getThing().getUID());
+        }
     }
 
     @Override
