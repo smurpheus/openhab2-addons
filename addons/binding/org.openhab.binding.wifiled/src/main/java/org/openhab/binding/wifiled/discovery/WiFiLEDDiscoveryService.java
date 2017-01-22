@@ -91,7 +91,6 @@ public class WiFiLEDDiscoveryService extends AbstractDiscoveryService {
 
                 byte[] data = packet.getData();
                 String s = bytesToString(data);
-                System.out.println(ClassicWiFiLEDDriver.bytesToHex(data));
                 logger.debug("Disover response received: '{}' [{}] ", s, ClassicWiFiLEDDriver.bytesToHex(data));
 
                 // 192.168.178.25,ACCF23489C9A,HF-LPB100-ZJ200
